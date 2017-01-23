@@ -5,7 +5,7 @@ import java.util.Iterator;
  *
  * An implementation of fibonacci heap over non-negative integers.
  */
-public class FibonacciHeap {
+public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 
 	private static double LOG_2 = Math.log10(2);
 	public static int totalLinks = 0;
@@ -16,13 +16,17 @@ public class FibonacciHeap {
 	private int size;
 
 	public FibonacciHeap() {
-		this.sentinel = new HeapNode();
-		this.sentinel.right = this.sentinel;
-		this.sentinel.left = this.sentinel;
+		this.sentinel = createSentinel();
 		this.min = null;
 		this.size = 0;
 	}
 
+	private HeapNode createSentinel() {
+		HeapNode sentinel = new HeapNode();
+		sentinel.right = sentinel;
+		sentinel.left = sentinel;
+		return sentinel;
+	}
 	/**
 	 * The method returns true if and only if the heap is empty.
 	 */
@@ -48,21 +52,17 @@ public class FibonacciHeap {
 	 * Delete the node containing the minimum key.
 	 */
 	public void deleteMin() {
-		HeapNode z = this.min;
-		if (z == null) {
+		HeapNode min = this.min;
+		if (min == null) {
 			return;
 		}
 
-		HeapNode node = z.child;
-		Iterator<HeapNode> iterator = new HeapNodeIterator(node);
-		while (iterator.hasNext()) {
-			HeapNode x = iterator.next();
-			this.sentinel.appendSibling(x);
-			x.parent = null;
+		for (HeapNode child : min) {
+			this.sentinel.appendSibling(child);
+			child.parent = null;
 		}
-
 		this.min = null;
-		this.sentinel.deleteSibling(z);
+		this.sentinel.deleteSibling(min);
 		this.size--;
 		consolidate();
 	}
@@ -72,26 +72,21 @@ public class FibonacciHeap {
 			return;
 		}
 		int arraySize = (int) (Math.ceil((Math.log10(this.size) / LOG_2))) + 1;
-		HeapNode[] trees = new HeapNode[arraySize];
-		Iterator<HeapNode> iterator = new HeapNodeIterator(this.sentinel);
-		while (iterator.hasNext()) {
-			HeapNode x = iterator.next();
-			int d = x.rank;
-			while (d < arraySize && trees[d] != null) {
-				HeapNode y = trees[d];
-				x = link(y, x);
-				trees[d] = null;
+		HeapNode[] treesByRank = new HeapNode[arraySize];
+		for (HeapNode root : this) {
+			int d = root.rank;
+			while (d < arraySize && treesByRank[d] != null) {
+				HeapNode y = treesByRank[d];
+				root = link(y, root);
+				treesByRank[d] = null;
 				d = d + 1;
 			}
-			trees[d] = x;
+			treesByRank[d] = root;
 		}
 
-		this.min = null;
-		this.sentinel = new HeapNode();
-		this.sentinel.right = this.sentinel;
-		this.sentinel.left = this.sentinel;
-		for (int i = 0; i < trees.length; i++) {
-			HeapNode tree = trees[i];
+		this.sentinel = createSentinel();
+		for (int i = 0; i < treesByRank.length; i++) {
+			HeapNode tree = treesByRank[i];
 			if (tree != null) {
 				this.sentinel.appendSibling(tree);
 				if (this.min == null || tree.key < this.min.key) {
@@ -139,15 +134,14 @@ public class FibonacciHeap {
 			}
 			this.size += heap2.size;
 			heap2.sentinel.right.left = this.sentinel;
+			HeapNode temp = this.sentinel.right;
 			this.sentinel.right = heap2.sentinel.right;
+			heap2.sentinel.left.right = temp;
 		}
 	}
 
 	/**
-	 * public int size()
-	 *
 	 * Return the number of elements in the heap
-	 * 
 	 */
 	public int size() {
 		return this.size;
@@ -161,9 +155,7 @@ public class FibonacciHeap {
 	public int[] countersRep() {
 		int arraySize = (int) (Math.ceil((Math.log10(this.size) / LOG_2))) + 1;
 		int[] arr = new int[arraySize];
-		Iterator<HeapNode> it = new HeapNodeIterator(this.sentinel);
-		while (it.hasNext()) {
-			HeapNode node = it.next();
+		for (HeapNode node : this) {
 			arr[node.rank]++;
 		}
 		return arr;
@@ -223,8 +215,6 @@ public class FibonacciHeap {
 	}
 
 	/**
-	 * public int potential()
-	 *
 	 * This function returns the current potential of the heap, which is:
 	 * Potential = #trees + 2*#marked The potential equals to the number of
 	 * trees in the heap plus twice the number of marked nodes in the heap.
@@ -232,25 +222,27 @@ public class FibonacciHeap {
 	public int potential() {
 		int trees = 0;
 		int totalMarked = 0;
-		Iterator<HeapNode> iterator = new HeapNodeIterator(this.sentinel);
-		while (iterator.hasNext()) {
+		for (HeapNode root : this) {
 			trees++;
-			totalMarked += countMarked(iterator.next());
+			totalMarked += countMarked(root);
 		}
 		return trees + 2 * totalMarked;
 	}
 
 	public int countMarked(HeapNode node) {
 		int totalMarked = 0;
-		Iterator<HeapNode> iterator = new HeapNodeIterator(node.child);
-		while (iterator.hasNext()) {
-			HeapNode child = iterator.next();
+		for (HeapNode child : node) {
 			if (child.isMarked) {
 				totalMarked++;
 			}
 			totalMarked += countMarked(child);
 		}
 		return totalMarked;
+	}
+
+	@Override
+	public Iterator<HeapNode> iterator() {
+		return new HeapNodeIterator(this.sentinel);
 	}
 
 	/**
@@ -302,7 +294,7 @@ public class FibonacciHeap {
 	 * HeapNode), do it in this file, not in another file
 	 * 
 	 */
-	public class HeapNode {
+	public class HeapNode implements  Iterable<HeapNode> {
 		Integer key;
 
 		HeapNode parent;
@@ -317,9 +309,7 @@ public class FibonacciHeap {
 			this.parent = null;
 			this.right = this;
 			this.left = this;
-			this.child = new HeapNode();
-			this.child.right = this.child;
-			this.child.left = this.child;
+			this.child = createSentinel();
 			this.isMarked = false;
 			this.rank = 0;
 		}
@@ -342,6 +332,11 @@ public class FibonacciHeap {
 
 		public boolean isSentinel() {
 			return this.key == null;
+		}
+
+		@Override
+		public Iterator<HeapNode> iterator() {
+			return new HeapNodeIterator(this.child);
 		}
 	}
 
