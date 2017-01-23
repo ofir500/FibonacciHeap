@@ -345,7 +345,7 @@ public class FibonacciHeapTest {
 
 		@Override
 		protected void test() {
-			int[] vals = createValues(100);
+			int[] vals = createValues(10000);
 			FibonacciHeap.HeapNode[] nodes = new FibonacciHeap.HeapNode[vals.length];
 			FibonacciHeap heap1 = new FibonacciHeap();
 
@@ -622,7 +622,6 @@ public class FibonacciHeapTest {
 	}
 
 	public static void main(String[] argv) {
-
 		ExecutorService executor = Executors.newSingleThreadExecutor();
 		Test[] tests = { new TestMeld1(), new TestMeld2(), new TestMeld3(), new TestMeld4(), new TestMeld5(),
 				new TestInsert(), new TestFindMin1(), new TestFindMin2(), new TestDeleteMin(), new TestDelete(),

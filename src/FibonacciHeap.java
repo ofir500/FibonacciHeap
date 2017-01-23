@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -7,7 +8,7 @@ import java.util.Iterator;
  */
 public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 
-	private static double LOG_2 = Math.log10(2);
+	private static double LOG_GOLDEN_RATIO = Math.log10(1.6);
 	public static int totalLinks = 0;
 	public static int totalCuts = 0;
 
@@ -27,6 +28,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		sentinel.left = sentinel;
 		return sentinel;
 	}
+
 	/**
 	 * The method returns true if and only if the heap is empty.
 	 */
@@ -52,17 +54,16 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 	 * Delete the node containing the minimum key.
 	 */
 	public void deleteMin() {
-		HeapNode min = this.min;
-		if (min == null) {
+		if (this.min == null) {
 			return;
 		}
 
-		for (HeapNode child : min) {
+		for (HeapNode child : this.min) {
 			this.sentinel.appendSibling(child);
 			child.parent = null;
 		}
-		this.min = null;
-		this.sentinel.deleteSibling(min);
+		this.sentinel.deleteSibling(this.min);
+		this.min = null; // consolidate function will find the new minimum
 		this.size--;
 		consolidate();
 	}
@@ -71,7 +72,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		if (this.size == 0) {
 			return;
 		}
-		int arraySize = (int) (Math.ceil((Math.log10(this.size) / LOG_2))) + 1;
+		int arraySize = ((int) (Math.log10(this.size) / LOG_GOLDEN_RATIO)) + 1;
 		HeapNode[] treesByRank = new HeapNode[arraySize];
 		for (HeapNode root : this) {
 			int d = root.rank;
@@ -79,7 +80,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 				HeapNode y = treesByRank[d];
 				root = link(y, root);
 				treesByRank[d] = null;
-				d = d + 1;
+				d++;
 			}
 			treesByRank[d] = root;
 		}
@@ -153,7 +154,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 	 * 
 	 */
 	public int[] countersRep() {
-		int arraySize = (int) (Math.ceil((Math.log10(this.size) / LOG_2))) + 1;
+		int arraySize = (int) (Math.ceil((Math.log10(this.size) / LOG_GOLDEN_RATIO))) + 1;
 		int[] arr = new int[arraySize];
 		for (HeapNode node : this) {
 			arr[node.rank]++;
@@ -285,7 +286,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		System.out.println("Min: " + fb.findMin().key);
 		fb.decreaseKey(node7, 2);
 		System.out.println("Min: " + fb.findMin().key);*/
-		FibonacciHeap fb1 = new FibonacciHeap();
+		/*FibonacciHeap fb1 = new FibonacciHeap();
 		fb1.insert(1);
 		fb1.insert(2);
 		fb1.insert(3);
@@ -296,7 +297,29 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		fb1.meld(fb2);
 		for (HeapNode root : fb1) {
 			System.out.println(root.key);
-		}
+		}*/
+		/*for (int i = 1 ; i <= 100; i++) {
+			int a = (int) (Math.log10(i) / LOG_GOLDEN_RATIO);
+			a++;
+			System.out.println(i + ": " + a);
+		}*/
+		//[32, 52, 35, 62, 38, 23, 30]
+		FibonacciHeap h = new FibonacciHeap();
+		HeapNode node1 = h.insert(32);
+		HeapNode node2 = h.insert(52);
+		HeapNode node3 = h.insert(35);
+		HeapNode node4 = h.insert(62);
+		HeapNode node5 = h.insert(38);
+		HeapNode node6 = h.insert(23);
+		HeapNode node7 = h.insert(30);
+		h.delete(node1);
+		h.delete(node2);
+		h.delete(node3);
+		System.out.println(Arrays.toString(h.countersRep()));
+		h.delete(node4);
+		h.delete(node5);
+		h.delete(node6);
+		h.delete(node7);
 	}
 
 	/**
