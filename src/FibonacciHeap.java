@@ -271,7 +271,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 	}
 
 	public static void main(String[] args) {
-		FibonacciHeap fb = new FibonacciHeap();
+		/*FibonacciHeap fb = new FibonacciHeap();
 		fb.insert(5);
 		fb.insert(6);
 		HeapNode node7 = fb.insert(7);
@@ -284,7 +284,19 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		fb.deleteMin();
 		System.out.println("Min: " + fb.findMin().key);
 		fb.decreaseKey(node7, 2);
-		System.out.println("Min: " + fb.findMin().key);
+		System.out.println("Min: " + fb.findMin().key);*/
+		FibonacciHeap fb1 = new FibonacciHeap();
+		fb1.insert(1);
+		fb1.insert(2);
+		fb1.insert(3);
+		FibonacciHeap fb2 = new FibonacciHeap();
+		fb2.insert(4);
+		fb2.insert(5);
+		fb2.insert(6);
+		fb1.meld(fb2);
+		for (HeapNode root : fb1) {
+			System.out.println(root.key);
+		}
 	}
 
 	/**
