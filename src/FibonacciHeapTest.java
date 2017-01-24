@@ -345,7 +345,7 @@ public class FibonacciHeapTest {
 
 		@Override
 		protected void test() {
-			int[] vals = createValues(10000);
+			int[] vals = createValues(500000);
 			FibonacciHeap.HeapNode[] nodes = new FibonacciHeap.HeapNode[vals.length];
 			FibonacciHeap heap1 = new FibonacciHeap();
 

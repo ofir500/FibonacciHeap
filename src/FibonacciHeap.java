@@ -8,13 +8,14 @@ import java.util.Iterator;
  */
 public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 
-	private static double LOG_GOLDEN_RATIO = Math.log10(1.6);
 	public static int totalLinks = 0;
 	public static int totalCuts = 0;
 
 	HeapNode sentinel;
 	private HeapNode min;
 	private int size;
+	private int totalTrees;
+	private int totalMarkedNodes;
 
 	public FibonacciHeap() {
 		this.sentinel = createSentinel();
@@ -47,6 +48,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 			this.min = node;
 		}
 		this.size++;
+		this.totalTrees++;
 		return node;
 	}
 
@@ -64,19 +66,19 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		}
 		this.sentinel.deleteSibling(this.min);
 		this.min = null; // consolidate function will find the new minimum
-		this.size--;
 		consolidate();
+		this.size--;
 	}
 
 	private void consolidate() {
 		if (this.size == 0) {
 			return;
 		}
-		int arraySize = ((int) (Math.log10(this.size) / LOG_GOLDEN_RATIO)) + 1;
+		int arraySize = (int)(5*Math.log10(this.size));
 		HeapNode[] treesByRank = new HeapNode[arraySize];
 		for (HeapNode root : this) {
 			int d = root.rank;
-			while (d < arraySize && treesByRank[d] != null) {
+			while (treesByRank[d] != null) {
 				HeapNode y = treesByRank[d];
 				root = link(y, root);
 				treesByRank[d] = null;
@@ -86,10 +88,12 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		}
 
 		this.sentinel = createSentinel();
+		this.totalTrees = 0;
 		for (int i = 0; i < treesByRank.length; i++) {
 			HeapNode tree = treesByRank[i];
 			if (tree != null) {
 				this.sentinel.appendSibling(tree);
+				this.totalTrees++;
 				if (this.min == null || tree.key < this.min.key) {
 					this.min = tree;
 				}
@@ -154,7 +158,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 	 * 
 	 */
 	public int[] countersRep() {
-		int arraySize = (int) (Math.ceil((Math.log10(this.size) / LOG_GOLDEN_RATIO))) + 1;
+		int arraySize = (int)(5*Math.log10(this.size)) + 1;
 		int[] arr = new int[arraySize];
 		for (HeapNode node : this) {
 			arr[node.rank]++;
@@ -197,7 +201,10 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		y.rank--;
 		this.sentinel.appendSibling(x);
 		x.parent = null;
-		x.isMarked = false;
+		if (x.isMarked) {
+			this.totalMarkedNodes--;
+			x.isMarked = false;
+		}
 		totalCuts++;
 	}
 
@@ -209,6 +216,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 
 		if (!y.isMarked) {
 			y.isMarked = true;
+			this.totalMarkedNodes++;
 		} else {
 			cut(y, z);
 			cascadingCut(z);
@@ -221,24 +229,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 	 * trees in the heap plus twice the number of marked nodes in the heap.
 	 */
 	public int potential() {
-		int trees = 0;
-		int totalMarked = 0;
-		for (HeapNode root : this) {
-			trees++;
-			totalMarked += countMarked(root);
-		}
-		return trees + 2 * totalMarked;
-	}
-
-	public int countMarked(HeapNode node) {
-		int totalMarked = 0;
-		for (HeapNode child : node) {
-			if (child.isMarked) {
-				totalMarked++;
-			}
-			totalMarked += countMarked(child);
-		}
-		return totalMarked;
+		return this.totalTrees + 2*this.totalMarkedNodes;
 	}
 
 	@Override
@@ -271,55 +262,12 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		return totalCuts;
 	}
 
-	public static void main(String[] args) {
-		/*FibonacciHeap fb = new FibonacciHeap();
-		fb.insert(5);
-		fb.insert(6);
-		HeapNode node7 = fb.insert(7);
-		fb.insert(3);
-		fb.insert(2);
-		fb.deleteMin();
-		System.out.println("Min: " + fb.findMin().key);
-		fb.deleteMin();
-		System.out.println("Min: " + fb.findMin().key);
-		fb.deleteMin();
-		System.out.println("Min: " + fb.findMin().key);
-		fb.decreaseKey(node7, 2);
-		System.out.println("Min: " + fb.findMin().key);*/
-		/*FibonacciHeap fb1 = new FibonacciHeap();
-		fb1.insert(1);
-		fb1.insert(2);
-		fb1.insert(3);
-		FibonacciHeap fb2 = new FibonacciHeap();
-		fb2.insert(4);
-		fb2.insert(5);
-		fb2.insert(6);
-		fb1.meld(fb2);
-		for (HeapNode root : fb1) {
-			System.out.println(root.key);
-		}*/
-		/*for (int i = 1 ; i <= 100; i++) {
-			int a = (int) (Math.log10(i) / LOG_GOLDEN_RATIO);
-			a++;
-			System.out.println(i + ": " + a);
-		}*/
-		//[32, 52, 35, 62, 38, 23, 30]
-		FibonacciHeap h = new FibonacciHeap();
-		HeapNode node1 = h.insert(32);
-		HeapNode node2 = h.insert(52);
-		HeapNode node3 = h.insert(35);
-		HeapNode node4 = h.insert(62);
-		HeapNode node5 = h.insert(38);
-		HeapNode node6 = h.insert(23);
-		HeapNode node7 = h.insert(30);
-		h.delete(node1);
-		h.delete(node2);
-		h.delete(node3);
-		System.out.println(Arrays.toString(h.countersRep()));
-		h.delete(node4);
-		h.delete(node5);
-		h.delete(node6);
-		h.delete(node7);
+	public void print() {
+		System.out.println("***************************************** Beginnig of output **********************************");
+		for (HeapNode root : this) {
+			root.print();
+		}
+		System.out.println("***************************************** End of output **********************************");
 	}
 
 	/**
@@ -353,6 +301,10 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 			this.key = null;
 		}
 
+		public Integer getKey() {
+			return this.key;
+		}
+
 		public void appendSibling(HeapNode node) {
 			node.left = this;
 			node.right = this.right;
@@ -372,6 +324,24 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		@Override
 		public Iterator<HeapNode> iterator() {
 			return new HeapNodeIterator(this.child);
+		}
+
+		public void print() {
+			print("", true);
+		}
+
+		private void print(String prefix, boolean isTail) {
+			String suffix = this.isMarked ? "*" : "";
+			System.out.println(prefix + (isTail ? "└── " : "├── ") + key + suffix);
+			Iterator<HeapNode> it = this.iterator();
+			while (it.hasNext()) {
+				HeapNode node = it.next();
+				if (it.hasNext()) {
+					node.print(prefix + (isTail ? "    " : "│   "), false);
+				} else {
+					node.print(prefix + (isTail ?"    " : "│   "), true);
+				}
+			}
 		}
 	}
 
