@@ -13,15 +13,13 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 	private HeapNode sentinel;
 	private HeapNode min;
 	private int size;
-	private int totalTrees;
-	private int totalMarkedNodes;
+	private int potential;
 
 	public FibonacciHeap() {
 		this.sentinel = createSentinel();
 		this.min = null;
 		this.size = 0;
-		this.totalTrees = 0;
-		this.totalMarkedNodes = 0;
+		this.potential = 0;
 	}
 
 	/**
@@ -55,7 +53,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 			this.min = node;
 		}
 		this.size++;
-		this.totalTrees++;
+		this.potential++; //each insertion adds a new tree
 		return node;
 	}
 
@@ -72,9 +70,11 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		for (HeapNode child : this.min) {
 			this.sentinel.appendSibling(child);
 			child.parent = null;
+			this.potential++; // each child that becomes a root adds 1 to the potential
 		}
-		//delete the minimum
+		//delete the minimum and reduce potential by 1
 		this.sentinel.deleteSibling(this.min);
+		this.potential--;
 		this.min = null; // consolidate function will find the new minimum
 		this.size--;
 		consolidate();
@@ -101,6 +101,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 			while (treesByRank[rank] != null) {
 				HeapNode x = treesByRank[rank];
 				root = link(x, root);
+				this.potential--; // each link reduces one tree
 				treesByRank[rank] = null;
 				rank++;
 			}
@@ -110,12 +111,10 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 
 		// clear the root list and append the roots from the the list
 		this.sentinel = createSentinel();
-		this.totalTrees = 0;
 		for (int i = 0; i < treesByRank.length; i++) {
 			HeapNode tree = treesByRank[i];
 			if (tree != null) {
 				this.sentinel.appendSibling(tree);
-				this.totalTrees++;
 				if (this.min == null || tree.key < this.min.key) {
 					this.min = tree;
 				}
@@ -229,12 +228,12 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		// append node to root list and set its parent to null
 		this.sentinel.appendSibling(node);
 		node.parent = null;
-		this.totalTrees++;
+		this.potential++; //each cut adds another tree
 
 		// if node was marked then unmark it
 		if (node.isMarked) {
-			this.totalMarkedNodes--;
 			node.isMarked = false;
+			this.potential -= 2;
 		}
 		totalCuts++;
 	}
@@ -255,7 +254,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		if (!node.isMarked) {
 			// if node was not marked, mark it
 			node.isMarked = true;
-			this.totalMarkedNodes++;
+			this.potential += 2;
 		} else {
 			// node was already marked, cut it from its parent
 			cut(node, parent);
@@ -270,15 +269,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 	 * trees in the heap plus twice the number of marked nodes in the heap.
 	 */
 	public int potential() {
-		return this.totalTrees + 2 * this.totalMarkedNodes;
-	}
-
-	public int totalTrees() {
-		return this.totalTrees;
-	}
-
-	public int totalMarked() {
-		return this.totalMarkedNodes;
+		return this.potential;
 	}
 
 	@Override
