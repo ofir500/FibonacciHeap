@@ -1,9 +1,11 @@
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
  * FibonacciHeap
  * <p>
  * An implementation of fibonacci heap over non-negative integers.
+ * implements Iterable - iteration is over the roots of trees held by the heap
  */
 public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 
@@ -105,11 +107,11 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 				treesByRank[rank] = null;
 				rank++;
 			}
-			// store tree in the array with index = rank
+			// store tree in the array at index = rank
 			treesByRank[rank] = root;
 		}
 
-		// clear the root list and append the roots from the the list
+		// clear the root list and append the roots from the the array
 		this.sentinel = createSentinel();
 		for (int i = 0; i < treesByRank.length; i++) {
 			HeapNode tree = treesByRank[i];
@@ -159,15 +161,17 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 			this.min = heap2.min;
 			this.sentinel = heap2.sentinel;
 			this.size = heap2.size;
+			this.potential = heap2.potential;
 		} else {
 			if (heap2.min.key < this.min.key) {
 				this.min = heap2.min;
 			}
 			this.size += heap2.size;
+			this.potential += heap2.potential;
 			heap2.sentinel.right.left = this.sentinel;
-			HeapNode temp = this.sentinel.right;
+			heap2.sentinel.left.right = this.sentinel.right;
 			this.sentinel.right = heap2.sentinel.right;
-			heap2.sentinel.left.right = temp;
+
 		}
 	}
 
@@ -272,10 +276,10 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		return this.potential;
 	}
 
-	@Override
 	/**
 	 * returns an iterator for the heap's root list
 	 */
+	@Override
 	public Iterator<HeapNode> iterator() {
 		return new HeapNodeIterator(this.sentinel);
 	}
@@ -306,21 +310,24 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		for (HeapNode root : this) {
 			root.print();
 		}
+		System.out.println("Potential: " + this.potential());
+		System.out.println(Arrays.toString(this.countersRep()));
 		System.out.println("***************************************** End of output **********************************");
 	}
 
 	/**
 	 * class represent a node in the heap
+	 * implements iterable - iteration is over child nodes
 	 */
 	public class HeapNode implements Iterable<HeapNode> {
-		Integer key;
 
-		HeapNode parent;
-		HeapNode right;
-		HeapNode left;
-		HeapNode child;
-		boolean isMarked;
-		int rank;
+		/*private*/ Integer key;
+		/*private*/ HeapNode parent;
+		/*private*/ HeapNode right;
+		/*private*/ HeapNode left;
+		/*private*/ HeapNode child;
+		/*private*/ boolean isMarked;
+		/*private*/ int rank;
 
 		public HeapNode(int key) {
 			this.key = key;
