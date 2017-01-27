@@ -226,6 +226,10 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		}
 	}
 
+	/**
+	 * removes a node from its parent's children list,
+	 * and adds it as a root in the root list
+	 */
 	private void cut(HeapNode node, HeapNode parent) {
 		// remove node from parent's children list and lower parent's rank
 		parent.child.deleteSibling(node);
