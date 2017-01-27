@@ -155,13 +155,15 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 	 * Meld the heap with heap2
 	 */
 	public void meld(FibonacciHeap heap2) {
-		if (heap2.size == 0) {
+		if (heap2.size == 0) { //heap2 is empty. nothing to meld
 			return;
-		} else if (this.size == 0) {
+
+		} else if (this.size == 0) { // this heap is empty, just copy pointers
 			this.min = heap2.min;
 			this.sentinel = heap2.sentinel;
 			this.size = heap2.size;
 			this.potential = heap2.potential;
+
 		} else {
 			if (heap2.min.key < this.min.key) {
 				this.min = heap2.min;
