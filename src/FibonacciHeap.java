@@ -155,7 +155,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 	 * Meld the heap with heap2
 	 */
 	public void meld(FibonacciHeap heap2) {
-		if (heap2.size == 0) { //heap2 is empty. nothing to meld
+		if (heap2 == null || heap2.size == 0) { //heap2 is empty. nothing to meld
 			return;
 
 		} else if (this.size == 0) { // this heap is empty, just copy pointers
@@ -207,6 +207,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 
 	/**
 	 * The function decreases the key of the node x by delta.
+	 * pre-condition: the node is in the heap
 	 */
 	public void decreaseKey(HeapNode x, int delta) {
 		// subtract delta from x.key
@@ -394,7 +395,8 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 
 		private void print(String prefix, boolean isTail) {
 			String suffix = this.isMarked ? "*" : "";
-			System.out.println(prefix + (isTail ? "└── " : "├── ") + key + suffix);
+			String suffix2 = " r: " + this.rank;
+			System.out.println(prefix + (isTail ? "└── " : "├── ") + key + suffix /*+ suffix2*/);
 			Iterator<HeapNode> it = this.iterator();
 			while (it.hasNext()) {
 				HeapNode node = it.next();

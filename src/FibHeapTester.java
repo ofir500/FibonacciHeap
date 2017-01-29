@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -6,10 +7,22 @@ import java.util.Map;
  */
 public class FibHeapTester {
 
-	public static void main(String[] args) {
-		//[32, 52, 35, 62, 38, 23, 30]
+	public static void testDeleteMin() {
+		FibonacciHeap fh = new FibonacciHeap();
+		Map<Integer, FibonacciHeap.HeapNode> nodes = new HashMap<>();
+		for (int i = 1; i <= 1_000_000; i++) {
+			nodes.put(i, fh.insert(i));
+		}
+		for (int i = 1; i <= 1_000_000; i++) {
+			fh.deleteMin();
+			if (i < 1_000_000 && fh.findMin().getKey() != i+1) {
+				System.out.println("That's really bad");
+			}
+		}
+		System.out.println(fh.empty() ? "Done" : "Problem! deleted all nodes yet heap is not empty");
+	}
 
-		/*
+	public static void testWithYourOwnEyes() {
 		FibonacciHeap h = new FibonacciHeap();
 		FibonacciHeap.HeapNode node1 = h.insert(32);
 		FibonacciHeap.HeapNode node2 = h.insert(52);
@@ -27,33 +40,22 @@ public class FibHeapTester {
 		h.print();
 		h.decreaseKey(node5, 5);
 		h.print();
-		System.out.println(h.totalMarked());
 		h.decreaseKey(node2, 18);
 		h.print();
-		System.out.println(h.totalTrees());
 		h.deleteMin();
 		h.print();
+		h.insert(667);
+		h.print();
+		h.decreaseKey(node9, 16);
+		h.print();
+		h.decreaseKey(node4, 30);
+		h.print();
+		h.decreaseKey(node1, 1);
+		h.print();
+	}
 
-		h.delete(node1);
-		h.delete(node2);
-		h.delete(node3);
-		System.out.println(Arrays.toString(h.countersRep()));
-		h.delete(node4);
-		h.delete(node5);
-		h.delete(node6);
-		h.delete(node7);*/
-
-		FibonacciHeap fh = new FibonacciHeap();
-		Map<Integer, FibonacciHeap.HeapNode> nodes = new HashMap<>();
-		for (int i = 1; i <= 1_000_000; i++) {
-			nodes.put(i, fh.insert(i));
-		}
-		for (int i = 1; i <= 1_000_000; i++) {
-			fh.deleteMin();
-			if (i == 500_000) {
-				System.out.println(fh.findMin().key);
-			}
-		}
-		System.out.println(fh.empty());
+	public static void main(String[] args) {
+		testWithYourOwnEyes();
+		//testDeleteMin();
 	}
 }

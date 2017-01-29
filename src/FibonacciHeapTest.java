@@ -329,7 +329,7 @@ public class FibonacciHeapTest {
 
 			Arrays.sort(vals);
 			for (int i = 0; i < vals.length; i++) {
-				if (heap1.findMin().key != vals[i]) {
+				if (heap1.findMin().getKey() != vals[i]) {
 					setFailed("min is " + vals[i] + " but findMin() says " + heap1.findMin());
 					break;
 				}
@@ -442,7 +442,7 @@ public class FibonacciHeapTest {
 
 		@Override
 		protected void test() {
-			int[] vals = createValues(1000);
+			int[] vals = createValues(10000);
 			FibonacciHeap heap1 = new FibonacciHeap();
 
 			for (int val : vals) {
