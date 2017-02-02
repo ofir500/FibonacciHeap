@@ -8,6 +8,7 @@ import java.util.concurrent.TimeoutException;
 
 public class FibonacciHeapTest {
 	private static int[] createValues(int n) {
+		n = 10_000;
 		int[] values = new int[n];
 		int maxValue = n * 10;
 		Random randomGenerator = new Random();

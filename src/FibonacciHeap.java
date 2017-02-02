@@ -4,13 +4,16 @@ import java.util.Iterator;
 /**
  * FibonacciHeap
  * <p>
+ *     Created by: Ofir Feffer	moodle:ofirfeffer	id: 203565833
+ *     				Ilor Ifrah	moodle: ilorifrach	id: 205828478
  * An implementation of fibonacci heap over non-negative integers.
  * implements Iterable - iteration is over the roots of trees held by the heap
+ *
  */
 public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 
-	public static int totalLinks = 0;
-	public static int totalCuts = 0;
+	static int totalLinks = 0;
+	static int totalCuts = 0;
 
 	private HeapNode sentinel;
 	private HeapNode min;
@@ -73,6 +76,10 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 			this.sentinel.appendSibling(child);
 			child.parent = null;
 			this.potential++; // each child that becomes a root adds 1 to the potential
+			if (child.isMarked) {
+				child.isMarked = false;
+				this.potential -= 2;
+			}
 		}
 		//delete the minimum and reduce potential by 1
 		this.sentinel.deleteSibling(this.min);
@@ -138,7 +145,10 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 			x.child.appendSibling(y);
 			x.rank++;
 			y.parent = x;
-			y.isMarked = false;
+			if (y.isMarked) {
+				y.isMarked = false;
+				this.potential -= 2;
+			}
 			totalLinks++;
 			return x;
 		}
@@ -291,6 +301,16 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		return new HeapNodeIterator(this.sentinel);
 	}
 
+	public void print() {
+		System.out.println("***************************************** Beginnig of output **********************************");
+		for (HeapNode root : this) {
+			root.print();
+		}
+		System.out.println("Potential: " + this.potential());
+		System.out.println(Arrays.toString(this.countersRep()));
+		System.out.println("***************************************** End of output **********************************");
+	}
+
 	/**
 	 * This static function returns the total number of link operations made
 	 * during the run-time of the program. A link operation is the operation
@@ -312,29 +332,19 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		return totalCuts;
 	}
 
-	public void print() {
-		System.out.println("***************************************** Beginnig of output **********************************");
-		for (HeapNode root : this) {
-			root.print();
-		}
-		System.out.println("Potential: " + this.potential());
-		System.out.println(Arrays.toString(this.countersRep()));
-		System.out.println("***************************************** End of output **********************************");
-	}
-
 	/**
 	 * class represent a node in the heap
 	 * implements iterable - iteration is over child nodes
 	 */
 	public class HeapNode implements Iterable<HeapNode> {
 
-		/*private*/ Integer key;
-		/*private*/ HeapNode parent;
-		/*private*/ HeapNode right;
-		/*private*/ HeapNode left;
-		/*private*/ HeapNode child;
-		/*private*/ boolean isMarked;
-		/*private*/ int rank;
+		Integer key;
+		HeapNode parent;
+		HeapNode right;
+		HeapNode left;
+		HeapNode child;
+		boolean isMarked;
+		private int rank;
 
 		public HeapNode(int key) {
 			this.key = key;
@@ -353,7 +363,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 			this.key = null;
 		}
 
-		public Integer getKey() {
+		public int getKey() {
 			return this.key;
 		}
 
@@ -396,7 +406,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 		private void print(String prefix, boolean isTail) {
 			String suffix = this.isMarked ? "*" : "";
 			String suffix2 = " r: " + this.rank;
-			System.out.println(prefix + (isTail ? "└── " : "├── ") + key + suffix /*+ suffix2*/);
+			System.out.println(prefix + (isTail ? "└── " : "├── ") + key + suffix);
 			Iterator<HeapNode> it = this.iterator();
 			while (it.hasNext()) {
 				HeapNode node = it.next();
@@ -407,6 +417,7 @@ public class FibonacciHeap implements Iterable<FibonacciHeap.HeapNode> {
 				}
 			}
 		}
+
 	}
 
 	/**
